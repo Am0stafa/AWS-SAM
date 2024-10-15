@@ -11,7 +11,7 @@
 8. [Testing Your Application](#testing-your-application)
 9. [Modifying and Updating Your Application](#modifying-and-updating-your-application)
 10. [Cleaning Up](#cleaning-up)
-11. [Building a RESTful API with Lambda and API Gateway using SAM](#Building a RESTful API with Lambda and API Gateway using SAM)
+11. [Building a RESTful API with Lambda and API Gateway using SAM](#Building-a RESTful API with Lambda and API Gateway using SAM)
 12. [Advanced Topics](#advanced-topics)
 13. [Troubleshooting](#troubleshooting)
 14. [Additional Resources](#additional-resources)
@@ -474,6 +474,211 @@ Then set up a CodePipeline that uses this buildspec file.
 By following these steps, you've created a fully functional RESTful API using AWS SAM, Lambda, and API Gateway. This approach allows for easy development, testing, and deployment of serverless APIs.
 
 Remember always to consider security best practices, such as implementing proper authentication and authorization for your API endpoints.
+
+## Building a RESTful API with JavaScript, Prisma, and AWS SAM
+
+AWS Serverless Application Model (SAM) provides an excellent framework for building and deploying serverless applications, including RESTful APIs. Let's walk through the process of creating a RESTful API using JavaScript, Prisma as the ORM, and AWS SAM for deployment.
+
+### 1. Set Up the Project
+
+First, create a new directory for your project and initialize it:
+
+```bash
+mkdir sam-prisma-api
+cd sam-prisma-api
+npm init -y
+```
+
+Install the necessary dependencies:
+
+```bash
+npm install @prisma/client express
+npm install --save-dev prisma @types/express aws-sdk
+```
+
+### 2. Initialize Prisma
+
+Initialize Prisma in your project:
+
+```bash
+npx prisma init
+```
+
+This will create a `prisma` directory with a `schema.prisma` file. Update the `schema.prisma` file with your data model. For example:
+
+```prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+  posts Post[]
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String?
+  published Boolean @default(false)
+  author    User    @relation(fields: [authorId], references: [id])
+  authorId  Int
+}
+```
+
+Note the `binaryTargets` in the `generator` block. This is crucial for AWS Lambda deployment, as mentioned in the Prisma documentation[^1].
+
+### 3. Create the Express App
+
+Create a file named `app.js` in your project root:
+
+```javascript
+const express = require('express');
+const { PrismaClient } = require('@prisma/client');
+
+const prisma = new PrismaClient();
+const app = express();
+
+app.use(express.json());
+
+// GET all users
+app.get('/users', async (req, res) => {
+  const users = await prisma.user.findMany();
+  res.json(users);
+});
+
+// POST new user
+app.post('/users', async (req, res) => {
+  const { name, email } = req.body;
+  const user = await prisma.user.create({
+    data: { name, email },
+  });
+  res.json(user);
+});
+
+// GET user by id
+app.get('/users/:id', async (req, res) => {
+  const { id } = req.params;
+  const user = await prisma.user.findUnique({
+    where: { id: parseInt(id) },
+  });
+  res.json(user);
+});
+
+module.exports = app;
+```
+
+### 4. Create the Lambda Handler
+
+Create a file named `lambda.js`:
+
+```javascript
+const serverless = require('serverless-http');
+const app = require('./app');
+
+module.exports.handler = serverless(app);
+```
+
+### 5. Set Up AWS SAM Template
+
+Create a `template.yaml` file in your project root:
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Prisma API
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: lambda.handler
+      Runtime: nodejs14.x
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+      Environment:
+        Variables:
+          DATABASE_URL: !Ref DatabaseUrl
+
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+
+Parameters:
+  DatabaseUrl:
+    Type: String
+    Description: The URL for the database
+
+Outputs:
+  ApiEndpoint:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ApiGatewayApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+```
+
+### 6. Configure SAM for Local Testing
+
+Create a `env.json` file for local testing:
+
+```json
+{
+  "ApiFunction": {
+    "DATABASE_URL": "your-database-url-here"
+  }
+}
+```
+
+### 7. Build and Deploy
+
+Build your SAM application:
+
+```bash
+sam build
+```
+
+Deploy your application:
+
+```bash
+sam deploy --guided
+```
+
+Follow the prompts to configure your deployment settings.
+
+### 8. Testing Your API
+
+After deployment, SAM will output the API Gateway endpoint URL. You can use tools like curl or Postman to test your API endpoints.
+
+For local testing, you can use:
+
+```bash
+sam local start-api --env-vars env.json
+```
+
+This setup creates a serverless RESTful API using JavaScript, Prisma as the ORM, and AWS SAM for deployment. It incorporates the best practices for deploying Prisma to AWS Lambda, such as specifying the correct `binaryTargets` in the Prisma schema[^1].
+
+Remember to handle environment variables securely, especially the `DATABASE_URL`, as suggested in the SST deployment guide[^2]. You might want to use AWS Systems Manager Parameter Store or AWS Secrets Manager for managing sensitive configuration in production.
+
+By following this approach, you can create a scalable, serverless API that leverages the power of Prisma for database operations and AWS Lambda for compute. This setup allows for easy development, testing, and deployment of your API, while maintaining the benefits of a serverless architecture.
+
+[^1]: https://www.prisma.io/docs/orm/prisma-client/deployment/serverless/deploy-to-aws-lambda
+[^2]: https://www.prisma.io/docs/guides/deployment/deployment-guides/deploying-to-aws-lambda
 
 
 ## Cleaning Up
