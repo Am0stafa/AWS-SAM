@@ -1,4 +1,4 @@
-# AWS Serverless Application Model (SAM) Hello World Application
+# AWS Serverless Application Model (SAM) Guide
 
 ## Table of Contents
 1. [Introduction to AWS SAM](#introduction-to-aws-sam)
@@ -10,35 +10,34 @@
 7. [Deploying Your Application](#deploying-your-application)
 8. [Testing Your Application](#testing-your-application)
 9. [Modifying and Updating Your Application](#modifying-and-updating-your-application)
-10. [Cleaning Up](#cleaning-up)
-11. [Building a RESTful API with Lambda and API Gateway using SAM](#Building-a RESTful API with Lambda and API Gateway using SAM)
-12. [Advanced Topics](#advanced-topics)
-13. [Troubleshooting](#troubleshooting)
-14. [Additional Resources](#additional-resources)
+10. [Building a RESTful API with Lambda and API Gateway using SAM](#building-a-restful-api-with-lambda-and-api-gateway-using-sam)
+11. [Building a RESTful API with JavaScript, Prisma, and AWS SAM](#building-a-restful-api-with-javascript-prisma-and-aws-sam)
+12. [Cleaning Up](#cleaning-up)
+13. [Advanced Topics](#advanced-topics)
+14. [Troubleshooting](#troubleshooting)
+15. [Additional Resources](#additional-resources)
 
 ## Introduction to AWS SAM
 
-AWS Serverless Application Model (SAM) is an open-source framework for building serverless applications on AWS. It provides a simplified way to define the Amazon API Gateway APIs, AWS Lambda functions, and Amazon DynamoDB tables needed by your serverless application[^1].
+AWS Serverless Application Model (SAM) is an open-source framework for building serverless applications on AWS. It simplifies the process of defining Amazon API Gateway APIs, AWS Lambda functions, and Amazon DynamoDB tables for your serverless applications.
 
 SAM consists of two main components:
-1. **AWS SAM template specification**: An extension of AWS CloudFormation templates with a simpler syntax for configuring common serverless application resources.
-2. **AWS SAM CLI**: A command-line tool that helps you develop, test, and deploy your serverless applications defined by SAM templates.
+1. **AWS SAM template specification**: An extension of AWS CloudFormation templates with a simpler syntax for serverless resources.
+2. **AWS SAM CLI**: A command-line tool for developing, testing, and deploying serverless applications.
 
 ## How AWS SAM Works
 
-AWS SAM works by extending CloudFormation templates with simplified syntax for defining serverless resources. Here's a high-level overview of how SAM works[^1]:
-
-1. You define your serverless application using AWS SAM syntax in a YAML file (typically named `template.yaml`).
-2. You use the SAM CLI to package your application, which:
-   - Uploads your application code to an S3 bucket.
-   - Generates a CloudFormation template that represents your SAM template.
-3. You then use the SAM CLI to deploy your application, which:
-   - Deploys the generated CloudFormation template to AWS.
-   - Creates and manages all the specified AWS resources.
+1. Define your serverless application using AWS SAM syntax in a YAML file (`template.yaml`).
+2. Use the SAM CLI to package your application:
+   - Uploads your code to an S3 bucket.
+   - Generates a CloudFormation template from your SAM template.
+3. Deploy your application using the SAM CLI:
+   - Deploys the CloudFormation template to AWS.
+   - Creates and manages all specified AWS resources.
 
 ## Project Structure
 
-A typical SAM project structure looks like this:
+A typical SAM project structure:
 
 ```
 sam-app/
@@ -58,43 +57,29 @@ sam-app/
 └── template.yaml
 ```
 
-Key files and directories:
-- `template.yaml`: The SAM template file that defines your application's AWS resources.
-- `hello_world/app.py`: The Lambda function code.
-- `hello_world/requirements.txt`: Python dependencies for the Lambda function.
-- `events/`: Contains sample event data for testing.
-- `tests/`: Contains unit and integration tests.
-- `samconfig.toml`: Configuration file for your SAM CLI commands.
-
 ## Prerequisites
 
-Before you begin, ensure you have the following installed and configured:
+Ensure you have the following installed and configured:
 
 1. [AWS CLI](https://aws.amazon.com/cli/)
 2. [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 3. [Python 3.9](https://www.python.org/downloads/) or later
 4. [Docker](https://docs.docker.com/get-docker/) (for local testing)
-
-Also, make sure you have configured your AWS credentials using `aws configure`.
+5. AWS credentials configured (`aws configure`)
 
 ## Getting Started
 
-To create a new SAM application:
+Create a new SAM application:
 
-1. Open your terminal and run:
-   ```
-   sam init
-   ```
-2. Follow the prompts to select your desired options. For this example, choose:
-   - AWS Quick Start Templates
-   - Hello World Example
-   - Python for the runtime
+```bash
+sam init
+```
 
-This will create a new directory with your project files.
+Follow the prompts to select your options (e.g., AWS Quick Start Templates, Hello World Example, Python runtime).
 
 ## Developing with AWS SAM
 
-The main file you'll work with is `template.yaml`. This file defines your serverless application's resources. Here's a breakdown of its key sections:
+The main file is `template.yaml`. Here's a basic example:
 
 ```yaml
 AWSTemplateFormatVersion: '2010-09-09'
@@ -124,11 +109,6 @@ Outputs:
     Description: API Gateway endpoint URL for Prod stage for Hello World function
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
 ```
-
-This template defines:
-- A Lambda function (`HelloWorldFunction`)
-- An API Gateway endpoint that triggers the function
-- An output that provides the API endpoint URL
 
 ## Deploying Your Application
 
@@ -679,7 +659,6 @@ By following this approach, you can create a scalable, serverless API that lever
 
 [^1]: https://www.prisma.io/docs/orm/prisma-client/deployment/serverless/deploy-to-aws-lambda
 [^2]: https://www.prisma.io/docs/guides/deployment/deployment-guides/deploying-to-aws-lambda
-
 
 ## Cleaning Up
 
