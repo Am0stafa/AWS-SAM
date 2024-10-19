@@ -22,7 +22,7 @@ SAM consists of two main components:
 
 When initializing a new SAM project using `sam init`, you're presented with several Quick Start template options. Each template is designed for specific use cases and provides a starting point for different types of serverless applications. Here's a breakdown of each option:
 
-![AWS SAM Quick Start Templates](Screenshot%202024-10-19%20at%201.20.35%20AM.png)
+![AWS SAM Quick Start Templates](./Screenshot%202024-10-19%20at%201.20.35%20AM.png)
 
 1. **Hello World Example**
    - A basic Lambda function that returns a "Hello World" message.
