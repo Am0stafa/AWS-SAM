@@ -34,15 +34,6 @@ When initializing a new SAM project using `sam init`, you're presented with seve
 
 3. **Hello World Example with Powertools for AWS Lambda**
    - Similar to the basic Hello World example, but includes AWS Lambda Powertools for enhanced observability and best practices.
-   - **What are AWS Lambda Powertools?**
-     - Powertools is a suite of utilities for AWS Lambda functions that simplifies the adoption of best practices such as tracing, structured logging, custom metrics, and more.
-     - It includes libraries for multiple languages (Python, Java, TypeScript) and integrates seamlessly with AWS services like CloudWatch, X-Ray, and CloudFormation.
-   - **Key features of Powertools:**
-     - Structured logging: Standardizes log formats for better searchability and analysis.
-     - Tracing: Enhances distributed tracing with AWS X-Ray.
-     - Metrics: Allows creation of custom metrics easily.
-     - Parameter retrieval: Simplifies fetching configuration from AWS Systems Manager Parameter Store or Secrets Manager.
-     - Idempotency: Helps in implementing idempotent Lambda functions.
    - **When to use**: When you want to implement best practices for observability and operations in your Lambda functions from the start.
 
 4. **Multi-step workflow**

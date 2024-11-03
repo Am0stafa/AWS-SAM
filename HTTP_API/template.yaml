@@ -1,13 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: SAM HTTP API with Lambda function
+Description: SAM HTTP API with Lambda functions
 
 Globals:
   Function:
     Timeout: 3
     MemorySize: 128
+    Runtime: python3.9
+    CodeUri: src/
 
 Resources:
+  # Single API Gateway that both Lambda functions will use
   MyHttpApi:
     Type: AWS::Serverless::HttpApi
     Properties:
@@ -23,23 +26,29 @@ Resources:
           - 'http://localhost:5173'
         AllowCredentials: true
 
-  MyFunction:
+  # First Lambda function for /auth
+  AuthFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
-      Handler: app.lambda_handler
-      Runtime: python3.9
+      Handler: handlers/auth_handler.lambda_handler
       Events:
         AuthEvent:
           Type: HttpApi
           Properties:
-            ApiId: !Ref MyHttpApi
+            ApiId: !Ref MyHttpApi  # References the same API Gateway
             Path: /auth
             Method: GET
+
+  # Second Lambda function for /validate
+  ValidateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handlers/validate_handler.lambda_handler
+      Events:
         ValidateEvent:
           Type: HttpApi
           Properties:
-            ApiId: !Ref MyHttpApi
+            ApiId: !Ref MyHttpApi  # References the same API Gateway
             Path: /validate
             Method: GET
 
