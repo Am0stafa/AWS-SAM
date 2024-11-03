@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM HTTP API with Lambda function
+Globals:
+  Function:
+    Timeout: 3
+    MemorySize: 128
+Resources:
+  MyHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowMethods:
+        - GET
+        AllowHeaders:
+        - Content-Type
+        - Authorization
+        - Cookie
+        AllowOrigins:
+        - http://localhost:3000
+        - http://localhost:5173
+        AllowCredentials: true
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: MyFunction
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId:
+              Ref: MyHttpApi
+            Path: /auth
+            Method: GET
+    Metadata:
+      SamResourceId: MyFunction
+Outputs:
+  ApiEndpoint:
+    Description: HTTP API endpoint URL
+    Value:
+      Fn::Sub: https://${MyHttpApi}.execute-api.${AWS::Region}.amazonaws.com
